@@ -1,7 +1,11 @@
 import { OnModuleInit } from "@nestjs/common";
 import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from "@nestjs/websockets";
 import{ Server } from "socket.io"
-@WebSocketGateway({})
+@WebSocketGateway({
+  cors: {
+    origin: '*'
+  }
+})
 export class MyGateway implements OnModuleInit {
 
   @WebSocketServer()
@@ -10,6 +14,10 @@ export class MyGateway implements OnModuleInit {
   onModuleInit() {
     this.server.on('connection', (socket)=>{
       console.log('connected to:', socket.id)
+
+      socket.on('disconnect', (reason)=>{
+        console.log('disconnected from:', socket.id)
+      })
     })
   }
 
