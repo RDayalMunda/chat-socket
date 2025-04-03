@@ -7,17 +7,18 @@ import mongoose, { Model } from 'mongoose';
 export class MessageService {
   constructor(
     @InjectModel(Message.name)
-    private MessageModel: Model<Message>
+    private MessageModel: Model<Message>,
   ) {}
 
-  async getMessagesByRoomId( roomId: string ) {
-    const messages = await this.MessageModel.find({ roomId: new mongoose.Types.ObjectId(roomId) })
-    return messages
+  async getMessagesByRoomId(roomId: string) {
+    const messages = await this.MessageModel.find({
+      roomId: new mongoose.Types.ObjectId(roomId),
+    });
+    return messages;
   }
 
-  async createMessage( messageObj: Message ) {
-    const newMessage = await this.MessageModel.create(messageObj)
-    return newMessage
+  async createMessage(messageObj: Message) {
+    const newMessage = await this.MessageModel.create(messageObj);
+    return newMessage;
   }
-
 }

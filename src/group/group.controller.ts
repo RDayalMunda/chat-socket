@@ -1,4 +1,37 @@
-import { Controller } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { GroupService } from './group.service';
 
 @Controller('group')
-export class GroupController {}
+export class GroupController {
+  constructor(private groupService: GroupService) {}
+
+  // user this API, when clicking on the user for the first Time.
+  // This will give you the data of the group if it exists.
+  // Else it will create a new group and return the data of the new group.
+  @Post('check-personal-group')
+  async checkPersonalGroup(
+    @Body()
+    body: {
+      users: any;
+    },
+  ) {
+    const { users } = body;
+    const responseObj: { status: string; groupData?: any } = {
+      status: 'success',
+    };
+
+    const userIds = users.map((user) => user.id);
+
+    const existingGroup = await this.groupService.checkPersonalGroup(userIds);
+    if (existingGroup) {
+      responseObj.groupData = existingGroup;
+    } else {
+      const newGroup = await this.groupService.createPersonalGroup({
+        users: userIds,
+        userNames: users.map((user) => user.name),
+      });
+      responseObj.groupData = newGroup;
+    }
+    return responseObj;
+  }
+}
