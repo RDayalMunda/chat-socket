@@ -6,6 +6,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
+import { MessageService } from '../message/message.service';
 
 @WebSocketGateway({
   cors: {
@@ -13,6 +14,8 @@ import { Server } from 'socket.io';
   },
 })
 export class MyGateway implements OnModuleInit {
+  constructor(private readonly messageService: MessageService) {}
+
   @WebSocketServer()
   server: Server;
 
@@ -26,11 +29,12 @@ export class MyGateway implements OnModuleInit {
   }
 
   @SubscribeMessage('message')
-  onNewMessage(@MessageBody() body: any) {
+  async onNewMessage(@MessageBody() body: any) {
     console.log('body', body);
-    // check who sent message
-    // check the target room`
-    this.server.emit('onMessage', { ...body, from: 'server' });
+    const message = await this.messageService.createMessage(body);
+    console.log('message', message);
+    // find out the roomId and emit on that particular roomId
+    // this.server.emit('onMessage', { ...message, from: 'server' });
   }
 
   @SubscribeMessage('typing')

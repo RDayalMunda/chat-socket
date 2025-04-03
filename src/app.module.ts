@@ -5,6 +5,7 @@ import { GatewayModule } from './gateway/gateway.module';
 import { MessageModule } from './message/message.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { GroupModule } from './group/group.module';
 
 @Module({
   imports: [
@@ -20,7 +21,8 @@ import { MongooseModule } from '@nestjs/mongoose';
       inject: [ConfigService],
     }),
     GatewayModule,
-    MessageModule
+    MessageModule,
+    GroupModule,
   ],
   controllers: [AppController],
   providers: [AppService],
