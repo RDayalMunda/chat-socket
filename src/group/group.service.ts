@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Group } from './group.schema';
-import { Model } from 'mongoose';
-import { CreatePersonalGroupDto } from './group.dto';
+import mongoose, { Model, mongo } from 'mongoose';
+import { CreatePersonalGroupDto, SetLastMessageDto } from './group.dto';
 
 @Injectable()
 export class GroupService {
@@ -35,5 +35,14 @@ export class GroupService {
       isPersonal: true,
     });
     return newGroup;
+  }
+
+  async setLastMessage(setLastMessageDto: SetLastMessageDto) {
+    const groupId = new mongoose.Types.ObjectId(setLastMessageDto.groupId);
+    const messageId = new mongoose.Types.ObjectId(setLastMessageDto.messageId);
+    const group = await this.GroupModel.findByIdAndUpdate(groupId, {
+      lastMessageId: messageId,
+    });
+    return group;
   }
 }

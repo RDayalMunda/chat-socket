@@ -15,7 +15,7 @@ export class Message {
   senderName: string;
 
   @Prop()
-  roomId: mongoose.Schema.Types.ObjectId;
+  groupId: mongoose.Schema.Types.ObjectId;
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message);

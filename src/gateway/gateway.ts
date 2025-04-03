@@ -7,14 +7,18 @@ import {
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { MessageService } from '../message/message.service';
-
+import { CreateMessageDto } from 'src/message/message.dto';
+import { GroupService } from 'src/group/group.service';
 @WebSocketGateway({
   cors: {
     origin: '*',
   },
 })
 export class MyGateway implements OnModuleInit {
-  constructor(private readonly messageService: MessageService) {}
+  constructor(
+    private readonly messageService: MessageService,
+    private readonly groupService: GroupService,
+  ) {}
 
   @WebSocketServer()
   server: Server;
@@ -29,12 +33,14 @@ export class MyGateway implements OnModuleInit {
   }
 
   @SubscribeMessage('message')
-  async onNewMessage(@MessageBody() body: any) {
-    console.log('body', body);
+  async onNewMessage(@MessageBody() body: CreateMessageDto) {
     const message = await this.messageService.createMessage(body);
-    console.log('message', message);
-    // find out the roomId and emit on that particular roomId
-    // this.server.emit('onMessage', { ...message, from: 'server' });
+    
+    // find out the groupId and emit on that particular groupId
+    this.server.to(body.groupId).emit('onMessage', { ...message, from: 'server' });
+    
+    // update the lastMessageId in the group
+    await this.groupService.setLastMessage( { groupId: body.groupId, messageId: message._id.toString() } )
   }
 
   @SubscribeMessage('typing')

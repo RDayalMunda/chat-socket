@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Message } from './message.schema';
 import mongoose, { Model } from 'mongoose';
+import { CreateMessageDto } from './message.dto';
 
 @Injectable()
 export class MessageService {
@@ -17,8 +18,14 @@ export class MessageService {
     return messages;
   }
 
-  async createMessage(messageObj: Message) {
-    const newMessage = await this.MessageModel.create(messageObj);
+  async createMessage(messageObj: CreateMessageDto) {
+    const { content, senderId, senderName, groupId } = messageObj;
+    const newMessage = await this.MessageModel.create({
+      content,
+      senderId,
+      senderName,
+      groupId: new mongoose.Types.ObjectId(groupId),
+    });
     return newMessage;
   }
 }
