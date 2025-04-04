@@ -39,4 +39,13 @@ export class GroupController {
     }
     return responseObj;
   }
+
+  @Get('all')
+  async getAllGroupsData(@Query('userId') userId: string) {
+    const groups = await this.groupService.getAllGroupsDataByUserId(userId);
+    return {
+      status: 'success',
+      groups: groups,
+    };
+  }
 }

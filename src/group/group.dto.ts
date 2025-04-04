@@ -7,4 +7,3 @@ export class SetLastMessageDto {
   readonly groupId: string;
   readonly messageId: string;
 }
-

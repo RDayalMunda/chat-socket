@@ -24,10 +24,10 @@ export class GroupService {
   async checkPersonalGroup(userIds: string[]) {
     const group = await this.GroupModel.findOne({
       isPersonal: true,
-      users: { 
+      users: {
         $all: userIds,
-        $size: userIds.length
-      }
+        $size: userIds.length,
+      },
     });
     return group;
   }
@@ -52,8 +52,59 @@ export class GroupService {
   async getAllGroupsByUserId(userId: string) {
     const groups = await this.GroupModel.find(
       { users: { $in: [userId] } },
-      { _id: 1 }
+      { _id: 1 },
     );
+    return groups;
+  }
+
+  async getAllGroupsDataByUserId(userId: string) {
+    const groups = await this.GroupModel.aggregate([
+      // Match groups where user is a member
+      { $match: { users: { $in: [userId] } } },
+
+      // Add a new field to determine the name based on conditions
+      {
+        $addFields: {
+          transformedName: {
+            $cond: {
+              if: { $eq: ['$isPersonal', true] },
+              then: {
+                $cond: {
+                  if: { $eq: [{ $size: '$users' }, 1] },
+                  then: { $arrayElemAt: ['$userNames', 0] },
+                  else: {
+                    $cond: {
+                      if: { $eq: [{ $arrayElemAt: ['$users', 0] }, userId] },
+                      then: { $arrayElemAt: ['$userNames', 1] },
+                      else: { $arrayElemAt: ['$userNames', 0] },
+                    },
+                  },
+                },
+              },
+              else: '$name',
+            },
+          },
+        },
+      },
+
+      // Project the final fields
+      {
+        $project: {
+          _id: 1,
+          name: '$transformedName',
+          isPersonal: 1,
+          users: 1,
+          userNames: 1,
+          lastMessageId: 1,
+          updatedAt: 1,
+          createdAt: 1,
+        },
+      },
+
+      // Sort by updatedAt in descending order
+      { $sort: { updatedAt: -1 } },
+    ]);
+
     return groups;
   }
 }
