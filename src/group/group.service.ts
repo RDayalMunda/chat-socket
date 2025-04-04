@@ -24,7 +24,10 @@ export class GroupService {
   async checkPersonalGroup(userIds: string[]) {
     const group = await this.GroupModel.findOne({
       isPersonal: true,
-      users: { $all: userIds },
+      users: { 
+        $all: userIds,
+        $size: userIds.length
+      }
     });
     return group;
   }

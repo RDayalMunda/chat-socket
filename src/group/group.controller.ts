@@ -20,7 +20,12 @@ export class GroupController {
       status: 'success',
     };
 
-    const userIds = users.map((user) => user.id);
+    const userIds = [users[0].id];
+    const userNames = [users[0].name];
+    if (users[1].id != users[0].id) {
+      userIds.push(users[1].id);
+      userNames.push(users[1].name);
+    }
 
     const existingGroup = await this.groupService.checkPersonalGroup(userIds);
     if (existingGroup) {
@@ -28,7 +33,7 @@ export class GroupController {
     } else {
       const newGroup = await this.groupService.createPersonalGroup({
         users: userIds,
-        userNames: users.map((user) => user.name),
+        userNames: userNames,
       });
       responseObj.groupData = newGroup;
     }
