@@ -48,4 +48,12 @@ export class GroupService {
     });
     return group;
   }
+
+  async getAllGroupsByUserId(userId: string) {
+    const groups = await this.GroupModel.find(
+      { users: { $in: [userId] } },
+      { _id: 1 }
+    );
+    return groups;
+  }
 }
