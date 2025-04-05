@@ -17,8 +17,13 @@ export class GroupController {
     },
   ) {
     const { users } = body;
-    const responseObj: { status: string; groupData?: any } = {
+    const responseObj: {
+      status: string;
+      groupData?: any;
+      isCreated?: boolean;
+    } = {
       status: 'success',
+      isCreated: false,
     };
 
     const userIds = [users[0].id];
@@ -37,6 +42,7 @@ export class GroupController {
         userNames: userNames,
       });
       responseObj.groupData = newGroup;
+      responseObj.isCreated = true;
     }
     return responseObj;
   }
