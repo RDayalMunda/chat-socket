@@ -73,6 +73,6 @@ export class MyGateway implements OnModuleInit {
     // find out the users present in the target rooms
     // emit to all the users present in the target rooms
 
-    this.server.to(body.groupId).emit('onTyping', { from: 'socket', body });
+    this.server.to(body.groupId).emit('onTyping', { from: 'socket', typing: body });
   }
 }

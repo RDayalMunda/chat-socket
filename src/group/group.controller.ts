@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { GroupService } from './group.service';
+import { CreateGroupDto } from './group.dto';
 
 @Controller('group')
 export class GroupController {
@@ -46,6 +47,15 @@ export class GroupController {
     return {
       status: 'success',
       groups: groups,
+    };
+  }
+
+  @Post('create')
+  async createGroup(@Body() body: CreateGroupDto) {
+    const newGroup = await this.groupService.createGroup(body);
+    return {
+      status: 'success',
+      group: newGroup,
     };
   }
 }
