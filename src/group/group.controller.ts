@@ -1,10 +1,14 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { GroupService } from './group.service';
 import { CreateGroupDto } from './group.dto';
+import { GatewayService } from 'src/gateway/gateway.service';
 
 @Controller('group')
 export class GroupController {
-  constructor(private groupService: GroupService) {}
+  constructor(
+    private groupService: GroupService,
+    private gatewayService: GatewayService,
+  ) {}
 
   // user this API, when clicking on the user for the first Time.
   // This will give you the data of the group if it exists.
@@ -43,6 +47,54 @@ export class GroupController {
       });
       responseObj.groupData = newGroup;
       responseObj.isCreated = true;
+
+      // Make all connected sockets with these userIds join the new group room
+      const server = GatewayService.getServer();
+      if (server) {
+        userIds.forEach((userId) => {
+          const sockets = server.sockets.sockets;
+
+          // to calculate the group name for personal group
+          const userIndex =
+            newGroup.users.length == 1
+              ? 0
+              : newGroup.users[0] == userId
+                ? 1
+                : 0;
+          const groupName = newGroup.userNames[userIndex];
+
+          sockets.forEach((socket) => {
+            if (socket.handshake.query.userConfig) {
+              try {
+                const userConfig = JSON.parse(
+                  (socket.handshake.query.userConfig as string) || '{}',
+                );
+                if (userConfig.id === userId) {
+                  const roomId = newGroup._id.toString();
+                  socket.join(roomId);
+                  console.log(
+                    userConfig.name,
+                    'joined room',
+                    newGroup._id.toString(),
+                  );
+                  newGroup.name = groupName;
+                  server.to(socket.id).emit('onRoomCreated', {
+                    from: 'socket',
+                    group: newGroup,
+                  });
+                  console.log(
+                    'on room created: and fired on',
+                    roomId,
+                    groupName,
+                  );
+                }
+              } catch (error) {
+                console.error('Error parsing userConfig:', error);
+              }
+            }
+          });
+        });
+      }
     }
     return responseObj;
   }

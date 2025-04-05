@@ -11,6 +11,7 @@ import { CreateMessageDto } from 'src/message/message.dto';
 import { GroupService } from 'src/group/group.service';
 import { GatewayService } from './gateway.service';
 import { SocketTypingDto } from './gateway.dto';
+
 @WebSocketGateway({
   cors: {
     origin: '*',
@@ -27,6 +28,8 @@ export class MyGateway implements OnModuleInit {
   server: Server;
 
   onModuleInit() {
+    GatewayService.setServer(this.server);
+    
     this.server.on('connection', (socket) => {
       console.log('connected to:', socket.id);
 
