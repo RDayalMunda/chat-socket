@@ -13,7 +13,7 @@ export class MessageService {
 
   async getMessagesByRoomId(roomId: string) {
     const messages = await this.MessageModel.find({
-      roomId: new mongoose.Types.ObjectId(roomId),
+      groupId: new mongoose.Types.ObjectId(roomId),
     });
     return messages;
   }
