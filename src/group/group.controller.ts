@@ -8,7 +8,7 @@ export class GroupController {
   constructor(
     private groupService: GroupService,
     private gatewayService: GatewayService,
-  ) {}
+  ) { }
 
   // user this API, when clicking on the user for the first Time.
   // This will give you the data of the group if it exists.
@@ -40,6 +40,13 @@ export class GroupController {
     const existingGroup = await this.groupService.checkPersonalGroup(userIds);
     if (existingGroup) {
       responseObj.groupData = existingGroup;
+      const userIndex =
+        existingGroup.users.length == 1
+          ? 0
+          : existingGroup.users[0] == userIds[0]
+            ? 1
+            : 0;
+      responseObj.groupData.name = existingGroup.userNames[userIndex];
     } else {
       const newGroup = await this.groupService.createPersonalGroup({
         users: userIds,
