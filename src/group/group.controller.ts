@@ -118,6 +118,45 @@ export class GroupController {
   @Post('create')
   async createGroup(@Body() body: CreateGroupDto) {
     const newGroup = await this.groupService.createGroup(body);
+
+    // Make all connected sockets with these userIds join the new group room
+    const server = GatewayService.getServer();
+    if (server) {
+      newGroup.users.forEach((userId) => {
+        const sockets = server.sockets.sockets;
+
+        const groupName = newGroup.name
+        sockets.forEach((socket) => {
+          if (socket.handshake.query.userConfig) {
+            try {
+              const userConfig = JSON.parse(
+                (socket.handshake.query.userConfig as string) || '{}',
+              );
+              if (userConfig.id === userId) {
+                const roomId = newGroup._id.toString();
+                socket.join(roomId);
+                console.log(
+                  userConfig.name,
+                  'joined room',
+                  newGroup._id.toString(),
+                );
+                server.to(socket.id).emit('onRoomCreated', {
+                  from: 'socket',
+                  group: newGroup,
+                });
+                console.log(
+                  'on room created: and fired on',
+                  roomId,
+                  groupName,
+                );
+              }
+            } catch (error) {
+              console.error('Error parsing userConfig:', error);
+            }
+          }
+        });
+      });
+    }
     return {
       status: 'success',
       group: newGroup,
