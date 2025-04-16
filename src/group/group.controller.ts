@@ -107,8 +107,8 @@ export class GroupController {
   }
 
   @Get('all')
-  async getAllGroupsData(@Query('userId') userId: string) {
-    const groups = await this.groupService.getAllGroupsDataByUserId(userId);
+  async getAllGroupsData(@Query('userId') userId: string, @Query('query') query: string) {
+    const groups = await this.groupService.getAllGroupsDataByUserId(userId, query);
     return {
       status: 'success',
       groups: groups,

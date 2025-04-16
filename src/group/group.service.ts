@@ -13,7 +13,7 @@ export class GroupService {
   constructor(
     @InjectModel(Group.name)
     private GroupModel: Model<Group>,
-  ) {}
+  ) { }
 
   async createGroup(groupObj: CreateGroupDto) {
     const newGroup = await this.GroupModel.create(groupObj);
@@ -61,10 +61,32 @@ export class GroupService {
     return groups;
   }
 
-  async getAllGroupsDataByUserId(userId: string) {
+  async getAllGroupsDataByUserId(userId: string, userName: string) {
     const groups = await this.GroupModel.aggregate([
       // Match groups where user is a member
-      { $match: { users: { $in: [userId] } } },
+      {
+        $match: {
+          users: { $in: [userId] },
+          $or: [
+            {
+              isPersonal: true,
+              userNames: {
+                $elemMatch: {
+                  $regex: userName,
+                  $options: 'i'
+                }
+              }
+            },
+            {
+              isPersonal: false,
+              name: {
+                $regex: userName,
+                $options: 'i'
+              }
+            },
+          ],
+        },
+      },
 
       // Add a new field to determine the name based on conditions
       {
@@ -107,6 +129,23 @@ export class GroupService {
 
       // Sort by updatedAt in descending order
       { $sort: { updatedAt: -1 } },
+
+      // get last message data also ignore this if the last message is not found
+      {
+        $lookup: {
+          from: 'messages',
+          localField: 'lastMessageId',
+          foreignField: '_id',
+          as: 'lastMessage',
+        },
+      },
+      // split array  of 1 element to object
+      {
+        $unwind: {
+          path: '$lastMessage',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
     ]);
 
     return groups;
