@@ -6,6 +6,7 @@ import { MessageModule } from './message/message.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { GroupModule } from './group/group.module';
+import { FilesModule } from './files/files.module';
 
 @Module({
   imports: [
@@ -23,8 +24,9 @@ import { GroupModule } from './group/group.module';
     GatewayModule,
     MessageModule,
     GroupModule,
+    FilesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }
