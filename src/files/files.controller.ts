@@ -1,10 +1,14 @@
 import {
   Controller,
+  Get,
+  Param,
   Post,
+  StreamableFile,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { createReadStream } from 'fs';
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
 
@@ -33,4 +37,13 @@ export class FilesController {
       files: files,
     };
   }
+
+  @Get('get-file/:filename')
+  getFile(@Param('filename') filename: string) {
+
+    const fullFilePath = join(__dirname, '..', '..', process.env.UPLOADS_LOCATION as string, filename);
+    const file = createReadStream(fullFilePath);
+    return new StreamableFile(file)
+  }
+
 }
